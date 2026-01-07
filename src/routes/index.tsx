@@ -8,6 +8,14 @@ import { CompaniesPage } from '@/pages/companies/CompaniesPage';
 import { CompanyDetailPage } from '@/pages/companies/CompanyDetailPage';
 import { BranchesPage } from '@/pages/branches/BranchesPage';
 import { DepartmentsPage } from '@/pages/departments/DepartmentsPage';
+import { TemplatesPage } from '@/pages/templates/TemplatesPage';
+import { AuditsPage } from '@/pages/audits/AuditsPage';
+import { CreateAuditPage } from '@/pages/audits/CreateAuditPage';
+import { AuditExecutionPage } from '@/pages/audits/AuditExecutionPage';
+import { AuditReportPage } from '@/pages/audits/AuditReportPage';
+import { ComparisonsPage } from '@/pages/comparisons/ComparisonsPage';
+import { RecommendationsPage } from '@/pages/recommendations/RecommendationsPage';
+import { TeamsPage } from '@/pages/teams/TeamsPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { Navbar } from '@/components/layout/Navbar';
 import { ROUTES } from '@/utils/constants';
@@ -87,6 +95,123 @@ export const AppRoutes: React.FC = () => {
               <Navbar />
               <main className="container-custom py-8">
                 <DepartmentsPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Plantillas */}
+      <Route
+        path="/templates"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <TemplatesPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Auditorías */}
+      <Route
+        path="/audits"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <AuditsPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/audits/create"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <CreateAuditPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/audits/:id/execute"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <AuditExecutionPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/audits/:id/report"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <AuditReportPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Comparaciones */}
+      <Route
+        path="/comparisons"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <ComparisonsPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Recomendaciones */}
+      <Route
+        path="/recommendations"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <RecommendationsPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Equipos */}
+      <Route
+        path="/teams"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <TeamsPage />
               </main>
             </>
           </ProtectedRoute>

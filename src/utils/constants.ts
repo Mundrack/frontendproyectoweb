@@ -23,3 +23,16 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refresh_token',
   USER: 'user',
 } as const;
+
+export const AUDIT_STATUS = {
+  DRAFT: 'draft',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+} as const;
+
+export const RESPONSE_TYPES = {
+  YES: 'yes',
+  NO: 'no',
+  PARTIAL: 'partial',
+  NA: 'na',
+} as const;

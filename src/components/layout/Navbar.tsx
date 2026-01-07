@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, LogOut, User, MapPin, Building } from 'lucide-react';
+import { Building2, LogOut, User, Home, FileText, ClipboardList, BarChart3, Lightbulb, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { APP_NAME, ROUTES } from '@/utils/constants';
 import { Button } from '@/components/common/Button';
@@ -10,10 +10,13 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
 
   const navLinks = [
-    { to: ROUTES.DASHBOARD, label: 'Dashboard', icon: Building2 },
+    { to: ROUTES.DASHBOARD, label: 'Dashboard', icon: Home },
     { to: ROUTES.COMPANIES, label: 'Empresas', icon: Building2 },
-    { to: '/branches', label: 'Sucursales', icon: MapPin },
-    { to: '/departments', label: 'Departamentos', icon: Building },
+    { to: '/templates', label: 'Plantillas', icon: FileText },
+    { to: '/audits', label: 'Auditorías', icon: ClipboardList },
+    { to: '/comparisons', label: 'Comparaciones', icon: BarChart3 },
+    { to: '/recommendations', label: 'Recomendaciones', icon: Lightbulb },
+    { to: '/teams', label: 'Equipos', icon: Users },
   ];
 
   const isActive = (path: string) => {
