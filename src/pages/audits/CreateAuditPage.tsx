@@ -6,6 +6,7 @@ import { templatesApi } from '@/api/endpoints/templates';
 import { companiesApi } from '@/api/endpoints/companies';
 import { Template, CreateAuditData } from '@/types/audit.types';
 import { Company, Branch, Department } from '@/types/company.types';
+import { User } from '@/types/auth.types';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Spinner } from '@/components/common/Spinner';
@@ -21,6 +22,7 @@ export const CreateAuditPage: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [employees, setEmployees] = useState<User[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -28,42 +30,46 @@ export const CreateAuditPage: React.FC = () => {
 
   const [formData, setFormData] = useState<CreateAuditData>({
     title: '',
-    description: '',
-    template_id: preselectedTemplateId || 0,
-    company_id: 0,
-    branch_id: undefined,
-    department_id: undefined,
-    assigned_to_id: undefined,
+    notes: '',
+    template: preselectedTemplateId || 0,
+    company: 0,
+    branch: undefined,
+    assigned_to: undefined,
     scheduled_date: undefined,
   });
+
+  // For cascading dropdowns, track selections separately
+  const [selectedBranch, setSelectedBranch] = useState<number | undefined>();
+  const [selectedDepartment, setSelectedDepartment] = useState<number | undefined>();
 
   useEffect(() => {
     loadInitialData();
   }, []);
 
   useEffect(() => {
-    if (formData.company_id) {
-      loadBranches(formData.company_id);
+    if (formData.company) {
+      loadBranches(formData.company);
     } else {
       setBranches([]);
       setDepartments([]);
     }
-  }, [formData.company_id]);
+  }, [formData.company]);
 
   useEffect(() => {
-    if (formData.branch_id) {
-      loadDepartments(formData.branch_id);
+    if (selectedBranch) {
+      loadDepartments(selectedBranch);
     } else {
       setDepartments([]);
     }
-  }, [formData.branch_id]);
+  }, [selectedBranch]);
 
   const loadInitialData = async () => {
     try {
       setLoading(true);
-      const [templatesData, companiesData] = await Promise.all([
+      const [templatesData, companiesData, employeesData] = await Promise.all([
         templatesApi.getActiveTemplates(),
         companiesApi.getCompanies(),
+        companiesApi.getEmployees(),
       ]);
 
       // Handle paginated responses
@@ -73,9 +79,13 @@ export const CreateAuditPage: React.FC = () => {
       const companies = Array.isArray(companiesData)
         ? companiesData
         : (companiesData as any)?.results || [];
+      const employees = Array.isArray(employeesData)
+        ? employeesData
+        : (employeesData as any)?.results || [];
 
       setTemplates(templates);
       setCompanies(companies);
+      setEmployees(employees);
     } catch (err) {
       setError('Error al cargar datos iniciales');
     } finally {
@@ -120,17 +130,43 @@ export const CreateAuditPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.template_id || !formData.company_id || !formData.title) {
+    if (!formData.template || !formData.company || !formData.title || !formData.assigned_to) {
       setError('Por favor completa todos los campos requeridos');
       return;
     }
 
+    // Clean the data - remove undefined values and empty strings
+    const cleanedData: any = {
+      title: formData.title,
+      template: formData.template,
+      company: formData.company,
+      assigned_to: formData.assigned_to,
+    };
+
+    if (formData.notes) {
+      cleanedData.notes = formData.notes;
+    }
+
+    if (formData.branch) {
+      cleanedData.branch = formData.branch;
+    }
+
+    if (formData.scheduled_date) {
+      cleanedData.scheduled_date = formData.scheduled_date;
+    }
+
+    console.log('Submitting audit data:', cleanedData);
+
     try {
       setSubmitting(true);
-      const audit = await auditsApi.createAudit(formData);
+      const audit = await auditsApi.createAudit(cleanedData);
       navigate('/audits');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Error al crear la auditoría');
+      console.error('Error creating audit:', err);
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.detail
+        || (typeof err.response?.data === 'object' ? JSON.stringify(err.response?.data) : 'Error al crear la auditoría');
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -174,13 +210,14 @@ export const CreateAuditPage: React.FC = () => {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción
+                Notas (Opcional)
               </label>
               <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="Agrega notas adicionales sobre esta auditoría..."
               />
             </div>
 
@@ -189,9 +226,9 @@ export const CreateAuditPage: React.FC = () => {
                 Plantilla *
               </label>
               <select
-                value={formData.template_id}
+                value={formData.template}
                 onChange={(e) =>
-                  setFormData({ ...formData, template_id: Number(e.target.value) })
+                  setFormData({ ...formData, template: Number(e.target.value) })
                 }
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -210,15 +247,17 @@ export const CreateAuditPage: React.FC = () => {
                 Empresa *
               </label>
               <select
-                value={formData.company_id}
-                onChange={(e) =>
+                value={formData.company}
+                onChange={(e) => {
+                  const companyId = Number(e.target.value);
                   setFormData({
                     ...formData,
-                    company_id: Number(e.target.value),
-                    branch_id: undefined,
-                    department_id: undefined,
-                  })
-                }
+                    company: companyId,
+                    branch: undefined,
+                  });
+                  setSelectedBranch(undefined);
+                  setSelectedDepartment(undefined);
+                }}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
@@ -236,15 +275,17 @@ export const CreateAuditPage: React.FC = () => {
                 Sucursal (Opcional)
               </label>
               <select
-                value={formData.branch_id || ''}
-                onChange={(e) =>
+                value={formData.branch || ''}
+                onChange={(e) => {
+                  const branchId = e.target.value ? Number(e.target.value) : undefined;
                   setFormData({
                     ...formData,
-                    branch_id: e.target.value ? Number(e.target.value) : undefined,
-                    department_id: undefined,
-                  })
-                }
-                disabled={!formData.company_id || branches.length === 0}
+                    branch: branchId,
+                  });
+                  setSelectedBranch(branchId);
+                  setSelectedDepartment(undefined);
+                }}
+                disabled={!formData.company || branches.length === 0}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
               >
                 <option value="">Seleccionar sucursal</option>
@@ -258,23 +299,23 @@ export const CreateAuditPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Departamento (Opcional)
+                Auditor Asignado *
               </label>
               <select
-                value={formData.department_id || ''}
+                value={formData.assigned_to || ''}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    department_id: e.target.value ? Number(e.target.value) : undefined,
+                    assigned_to: e.target.value ? Number(e.target.value) : undefined,
                   })
                 }
-                disabled={!formData.branch_id || departments.length === 0}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
-                <option value="">Seleccionar departamento</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
+                <option value="">Seleccionar auditor</option>
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.first_name} {employee.last_name} ({employee.email})
                   </option>
                 ))}
               </select>

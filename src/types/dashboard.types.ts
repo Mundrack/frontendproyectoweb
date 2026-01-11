@@ -24,8 +24,10 @@ export interface AuditByMonth {
 export interface TopCompany {
   company_id: number;
   company_name: string;
-  audits_count: number;
-  average_score: number;
+  total_audits: number;
+  avg_score: number;
+  completed: number;
+  branches_count: number;
 }
 
 export interface RecentAudit {

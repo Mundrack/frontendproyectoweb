@@ -35,13 +35,13 @@ export const auditsApi = {
     return response.data;
   },
 
-  getAuditQuestions: async (id: number): Promise<QuestionWithResponse[]> => {
-    const response = await api.get<QuestionWithResponse[]>(`/api/audits/${id}/questions/`);
+  getAuditQuestions: async (id: number): Promise<QuestionWithResponse[] | any> => {
+    const response = await api.get(`/api/audits/${id}/questions/`);
     return response.data;
   },
 
   submitResponse: async (auditId: number, data: CreateResponseData): Promise<void> => {
-    await api.post(`/api/audits/${auditId}/responses/`, data);
+    await api.post(`/api/audits/${auditId}/respond/`, data);
   },
 
   completeAudit: async (id: number): Promise<Audit> => {

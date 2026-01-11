@@ -8,7 +8,9 @@
       "Bash(npm run dev:*)",
       "Bash(npm install:*)",
       "Bash(python manage.py shell:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(timeout /t 3)",
+      "Bash(cat:*)"
     ]
   }
 }

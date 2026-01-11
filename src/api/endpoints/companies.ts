@@ -85,4 +85,11 @@ export const companiesApi = {
   deleteDepartment: async (id: number): Promise<void> => {
     await api.delete(`/api/departments/${id}/`);
   },
+
+  // Employees
+  getEmployees: async (companyId?: number): Promise<any[]> => {
+    const params = companyId ? { company: companyId } : {};
+    const response = await api.get('/api/auth/employees/', { params });
+    return response.data;
+  },
 };

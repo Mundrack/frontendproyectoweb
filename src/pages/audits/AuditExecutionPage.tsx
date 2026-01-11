@@ -39,14 +39,57 @@ export const AuditExecutionPage: React.FC = () => {
         auditsApi.getAuditQuestions(Number(id)),
       ]);
 
-      setAudit(auditData);
-      setQuestions(questionsData);
+      console.log('Audit data received:', auditData);
+      console.log('Questions data received:', questionsData);
 
-      const firstUnanswered = questionsData.findIndex((q) => !q.has_response);
+      setAudit(auditData);
+
+      // Handle different response formats
+      let questionsArray: any[] = [];
+
+      if (Array.isArray(questionsData)) {
+        // Direct array response
+        questionsArray = questionsData;
+        console.log('Questions is array, length:', questionsArray.length);
+      } else if (questionsData && typeof questionsData === 'object') {
+        // Check if it's the new format with questions property
+        if ('questions' in questionsData) {
+          questionsArray = (questionsData as any).questions || [];
+          console.log('Questions from questions property, length:', questionsArray.length);
+        } else if ('results' in questionsData) {
+          // Paginated response
+          questionsArray = (questionsData as any).results || [];
+          console.log('Questions is paginated, results length:', questionsArray.length);
+        }
+      }
+
+      console.log('Questions array to set:', questionsArray);
+
+      // Map the questions to include has_response flag
+      const mappedQuestions: QuestionWithResponse[] = questionsArray.map((q: any) => ({
+        id: q.id,
+        audit_id: auditData.id,
+        question_id: q.id,
+        question_text: q.question_text,
+        category: q.category,
+        order_num: q.order_num,
+        max_score: q.max_score,
+        is_required: q.is_required,
+        help_text: q.help_text,
+        has_response: q.response !== null && q.response !== undefined,
+        response: q.response?.response_type,
+        comments: q.response?.notes,
+      }));
+
+      console.log('Mapped questions:', mappedQuestions);
+      setQuestions(mappedQuestions);
+
+      const firstUnanswered = mappedQuestions.findIndex((q) => !q.has_response);
       if (firstUnanswered !== -1) {
         setCurrentQuestionIndex(firstUnanswered);
       }
     } catch (err) {
+      console.error('Error loading audit data:', err);
       setError('Error al cargar la auditoría');
     } finally {
       setLoading(false);
@@ -57,7 +100,37 @@ export const AuditExecutionPage: React.FC = () => {
     try {
       await auditsApi.submitResponse(Number(id), data);
 
-      const updatedQuestions = await auditsApi.getAuditQuestions(Number(id));
+      const updatedQuestionsData = await auditsApi.getAuditQuestions(Number(id));
+
+      // Handle different response formats (same as loadAuditData)
+      let questionsArray: any[] = [];
+
+      if (Array.isArray(updatedQuestionsData)) {
+        questionsArray = updatedQuestionsData;
+      } else if (updatedQuestionsData && typeof updatedQuestionsData === 'object') {
+        if ('questions' in updatedQuestionsData) {
+          questionsArray = (updatedQuestionsData as any).questions || [];
+        } else if ('results' in updatedQuestionsData) {
+          questionsArray = (updatedQuestionsData as any).results || [];
+        }
+      }
+
+      // Map the questions to include has_response flag
+      const updatedQuestions: QuestionWithResponse[] = questionsArray.map((q: any) => ({
+        id: q.id,
+        audit_id: Number(id),
+        question_id: q.id,
+        question_text: q.question_text,
+        category: q.category,
+        order_num: q.order_num,
+        max_score: q.max_score,
+        is_required: q.is_required,
+        help_text: q.help_text,
+        has_response: q.response !== null && q.response !== undefined,
+        response: q.response?.response_type,
+        comments: q.response?.notes,
+      }));
+
       setQuestions(updatedQuestions);
 
       const nextUnanswered = updatedQuestions.findIndex(
@@ -66,7 +139,7 @@ export const AuditExecutionPage: React.FC = () => {
 
       if (nextUnanswered !== -1) {
         setCurrentQuestionIndex(nextUnanswered);
-      } else if (currentQuestionIndex < questions.length - 1) {
+      } else if (currentQuestionIndex < updatedQuestions.length - 1) {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
       }
     } catch (err: any) {
@@ -112,7 +185,13 @@ export const AuditExecutionPage: React.FC = () => {
       confirmDialog.close();
       navigate(`/audits/${id}/report`);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Error al completar la auditoría');
+      console.error('Error completing audit:', err);
+      console.error('Error response:', err.response);
+      const errorMessage = err.response?.data?.error
+        || err.response?.data?.detail
+        || (typeof err.response?.data === 'object' ? JSON.stringify(err.response?.data) : 'Error al completar la auditoría');
+      setError(errorMessage);
+      confirmDialog.close();
     } finally {
       setCompleteLoading(false);
     }
@@ -127,7 +206,20 @@ export const AuditExecutionPage: React.FC = () => {
   }
 
   if (!audit || questions.length === 0) {
-    return <div>Auditoría no encontrada</div>;
+    console.log('Render check - audit:', audit);
+    console.log('Render check - questions length:', questions.length);
+    console.log('Render check - questions:', questions);
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-900 font-medium">Auditoría no encontrada</p>
+        <p className="text-sm text-gray-500 mt-2">
+          {!audit ? 'No se pudo cargar la auditoría' : 'No hay preguntas disponibles'}
+        </p>
+        <Button onClick={() => navigate('/audits')} className="mt-4">
+          Volver a Auditorías
+        </Button>
+      </div>
+    );
   }
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -199,10 +291,9 @@ export const AuditExecutionPage: React.FC = () => {
                   onClick={() => setCurrentQuestionIndex(idx)}
                   className={`
                     aspect-square rounded-lg border-2 font-medium text-sm transition-all
-                    ${
-                      idx === currentQuestionIndex
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : q.has_response
+                    ${idx === currentQuestionIndex
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : q.has_response
                         ? 'border-success-300 bg-success-50 text-success-700'
                         : 'border-gray-300 hover:border-gray-400'
                     }

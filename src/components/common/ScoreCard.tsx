@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getScoreColor } from '@/utils/formatters';
 
 interface ScoreCardProps {
@@ -9,48 +9,63 @@ interface ScoreCardProps {
 }
 
 export const ScoreCard: React.FC<ScoreCardProps> = ({ title, score, maxScore, percentage }) => {
+  const [animatedWidth, setAnimatedWidth] = useState(0);
   const color = getScoreColor(percentage);
+
+  useEffect(() => {
+    // Small delay to trigger animation
+    const timer = setTimeout(() => {
+      setAnimatedWidth(percentage);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [percentage]);
 
   const colorClasses = {
     success: {
-      bg: 'bg-success-50',
-      text: 'text-success-700',
-      border: 'border-success-200',
-      ring: 'ring-success-500',
+      bg: 'bg-emerald-50',
+      text: 'text-emerald-700',
+      border: 'border-emerald-100',
+      bar: 'from-emerald-500 to-teal-400',
+      badge: 'bg-emerald-100 text-emerald-800'
     },
     warning: {
-      bg: 'bg-warning-50',
-      text: 'text-warning-700',
-      border: 'border-warning-200',
-      ring: 'ring-warning-500',
+      bg: 'bg-amber-50',
+      text: 'text-amber-700',
+      border: 'border-amber-100',
+      bar: 'from-amber-400 to-orange-400',
+      badge: 'bg-amber-100 text-amber-800'
     },
     danger: {
-      bg: 'bg-danger-50',
-      text: 'text-danger-700',
-      border: 'border-danger-200',
-      ring: 'ring-danger-500',
+      bg: 'bg-rose-50',
+      text: 'text-rose-700',
+      border: 'border-rose-100',
+      bar: 'from-rose-500 to-red-400',
+      badge: 'bg-rose-100 text-rose-800'
     },
   };
 
-  const classes = colorClasses[color];
+  const classes = colorClasses[color as keyof typeof colorClasses];
 
   return (
-    <div className={`p-6 rounded-lg border-2 ${classes.border} ${classes.bg}`}>
-      <h3 className="text-sm font-medium text-gray-600 mb-3">{title}</h3>
-      <div className="flex items-baseline gap-2 mb-2">
-        <span className={`text-4xl font-bold ${classes.text}`}>{score}</span>
-        <span className="text-xl text-gray-500">/ {maxScore}</span>
-      </div>
-      <div className="relative pt-1">
-        <div className="flex mb-2 items-center justify-between">
-          <div className={`text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full ${classes.text} ${classes.bg}`}>
-            {percentage.toFixed(1)}%
+    <div className={`p-6 rounded-xl border ${classes.border} ${classes.bg} shadow-sm transition-all hover:shadow-md`}>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-1">{title}</h3>
+          <div className="flex items-baseline gap-2">
+            <span className={`text-5xl font-bold tracking-tight ${classes.text}`}>{score}</span>
+            <span className="text-xl text-gray-400 font-medium">/ {maxScore}</span>
           </div>
         </div>
-        <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+        <div className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${classes.badge}`}>
+          {percentage.toFixed(1)}%
+        </div>
+      </div>
+
+      <div className="relative pt-2">
+        <div className="overflow-hidden h-3 text-xs flex rounded-full bg-white/50 border border-gray-100 shadow-inner">
           <div
-            style={{ width: `${percentage}%` }}
-            className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500 ${classes.ring} ring-2`}
+            style={{ width: `${animatedWidth}%` }}
+            className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-1000 ease-out bg-gradient-to-r ${classes.bar}`}
           />
         </div>
       </div>

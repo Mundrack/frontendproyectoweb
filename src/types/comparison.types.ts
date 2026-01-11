@@ -19,7 +19,14 @@ export interface ComparisonAnalysis {
     id: number;
     title: string;
     score_percentage: number;
-    score_by_category: Record<string, number>;
+    score_by_category: Record<string, {
+      total_score: number;
+      max_score: number;
+      answered: number;
+      total_questions: number;
+      percentage: number;
+      average_score: number;
+    }>;
   }>;
   comparative_analysis: {
     same_template: boolean;

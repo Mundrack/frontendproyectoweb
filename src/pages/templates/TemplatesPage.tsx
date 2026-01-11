@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { templatesApi } from '@/api/endpoints/templates';
 import { Template, TemplateWithQuestions } from '@/types/audit.types';
+import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Spinner } from '@/components/common/Spinner';
 import { Alert } from '@/components/common/Alert';
 import { TemplateCard } from '@/components/templates/TemplateCard';
 import { TemplatePreview } from '@/components/templates/TemplatePreview';
+import { CreateTemplateDialog } from '@/components/templates/CreateTemplateDialog';
 
 export const TemplatesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ export const TemplatesPage: React.FC = () => {
   const [error, setError] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState<TemplateWithQuestions | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -58,6 +61,14 @@ export const TemplatesPage: React.FC = () => {
     navigate('/audits/create', { state: { templateId: template.id } });
   };
 
+  const handleEdit = (template: Template) => {
+    navigate(`/templates/${template.id}/editor`);
+  };
+
+  const handleCreateSuccess = (templateId: number) => {
+    navigate(`/templates/${templateId}/editor`);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -68,11 +79,17 @@ export const TemplatesPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Plantillas de Auditoría</h1>
-        <p className="text-gray-600 mt-1">
-          Selecciona una plantilla para crear una nueva auditoría
-        </p>
+      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Plantillas de Auditoría</h1>
+          <p className="text-gray-600 mt-1">
+            Gestiona y crea plantillas para tus auditorías
+          </p>
+        </div>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nueva Plantilla
+        </Button>
       </div>
 
       {error && <Alert type="error" message={error} onClose={() => setError('')} />}
@@ -93,6 +110,7 @@ export const TemplatesPage: React.FC = () => {
               template={template}
               onPreview={handlePreview}
               onUse={handleUseTemplate}
+              onEdit={handleEdit}
             />
           ))}
         </div>
@@ -111,6 +129,12 @@ export const TemplatesPage: React.FC = () => {
           onUse={() => handleUseTemplate(previewTemplate)}
         />
       )}
+
+      <CreateTemplateDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </div>
   );
 };

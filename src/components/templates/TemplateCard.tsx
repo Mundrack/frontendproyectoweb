@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Eye } from 'lucide-react';
+import { FileText, Eye, Edit } from 'lucide-react';
 import { Template } from '@/types/audit.types';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
@@ -8,9 +8,10 @@ interface TemplateCardProps {
   template: Template;
   onPreview: (template: Template) => void;
   onUse: (template: Template) => void;
+  onEdit?: (template: Template) => void;
 }
 
-export const TemplateCard: React.FC<TemplateCardProps> = ({ template, onPreview, onUse }) => {
+export const TemplateCard: React.FC<TemplateCardProps> = ({ template, onPreview, onUse, onEdit }) => {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <div className="flex items-start gap-4">
@@ -26,11 +27,17 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({ template, onPreview,
               <span>{template.question_count} preguntas</span>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="ghost" size="sm" onClick={() => onPreview(template)}>
               <Eye className="h-4 w-4 mr-1" />
               Vista Previa
             </Button>
+            {onEdit && (
+              <Button variant="ghost" size="sm" onClick={() => onEdit(template)}>
+                <Edit className="h-4 w-4 mr-1" />
+                Editar
+              </Button>
+            )}
             <Button size="sm" onClick={() => onUse(template)}>
               Usar Plantilla
             </Button>

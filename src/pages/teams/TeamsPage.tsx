@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, UserPlus } from 'lucide-react';
 import { teamsApi } from '@/api/endpoints/teams';
-import { Team } from '@/types/team.types';
+import { Team, CreateTeamData } from '@/types/team.types';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Spinner } from '@/components/common/Spinner';
 import { Alert } from '@/components/common/Alert';
 import { EmptyState } from '@/components/common/EmptyState';
+import { CreateTeamModal } from '@/components/teams/CreateTeamModal';
+import { TeamMembersModal } from '@/components/teams/TeamMembersModal';
 
 export const TeamsPage: React.FC = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
   useEffect(() => {
     loadTeams();
@@ -37,6 +42,21 @@ export const TeamsPage: React.FC = () => {
     }
   };
 
+  const handleCreateTeam = async (data: CreateTeamData) => {
+    await teamsApi.createTeam(data);
+    await loadTeams();
+  };
+
+  const handleManageMembers = (team: Team) => {
+    setSelectedTeam(team);
+    setIsMembersModalOpen(true);
+  };
+
+  const handleCloseMembersModal = () => {
+    setIsMembersModalOpen(false);
+    setSelectedTeam(null);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -54,7 +74,7 @@ export const TeamsPage: React.FC = () => {
             Gestiona los equipos y su estructura organizacional
           </p>
         </div>
-        <Button onClick={() => alert('Funcionalidad próximamente')}>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="h-5 w-5 mr-2" />
           Nuevo Equipo
         </Button>
@@ -69,7 +89,7 @@ export const TeamsPage: React.FC = () => {
             title="No hay equipos"
             description="Crea tu primer equipo para organizar tu estructura"
             actionLabel="Crear Equipo"
-            onAction={() => alert('Funcionalidad próximamente')}
+            onAction={() => setIsCreateModalOpen(true)}
           />
         </Card>
       ) : (
@@ -80,7 +100,12 @@ export const TeamsPage: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
-                    <p className="text-sm text-gray-600">{team.department_detail.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {team.department_name || team.department_detail?.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {team.branch_name} - {team.company_name}
+                    </p>
                   </div>
                   <span
                     className={`px-2 py-1 text-xs rounded ${
@@ -96,18 +121,47 @@ export const TeamsPage: React.FC = () => {
                 <div className="text-sm text-gray-600">
                   <p className="font-medium">{team.team_type_display}</p>
                   <p className="mt-1">{team.member_count} miembros</p>
-                  {team.leader_detail && (
-                    <p className="mt-1">Líder: {team.leader_detail.name}</p>
+                  {(team.leader_name || team.leader_detail?.name) && (
+                    <p className="mt-1">
+                      Líder: {team.leader_name || team.leader_detail?.name}
+                    </p>
                   )}
                 </div>
 
                 {team.description && (
                   <p className="text-sm text-gray-700">{team.description}</p>
                 )}
+
+                <div className="pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleManageMembers(team)}
+                    className="w-full"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Gestionar Miembros
+                  </Button>
+                </div>
               </div>
             </Card>
           ))}
         </div>
+      )}
+
+      <CreateTeamModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateTeam}
+      />
+
+      {selectedTeam && (
+        <TeamMembersModal
+          isOpen={isMembersModalOpen}
+          onClose={handleCloseMembersModal}
+          team={selectedTeam}
+          onUpdate={loadTeams}
+        />
       )}
     </div>
   );

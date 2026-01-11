@@ -9,11 +9,14 @@ import { CompanyDetailPage } from '@/pages/companies/CompanyDetailPage';
 import { BranchesPage } from '@/pages/branches/BranchesPage';
 import { DepartmentsPage } from '@/pages/departments/DepartmentsPage';
 import { TemplatesPage } from '@/pages/templates/TemplatesPage';
+import { TemplateEditorPage } from '@/pages/templates/TemplateEditorPage';
 import { AuditsPage } from '@/pages/audits/AuditsPage';
 import { CreateAuditPage } from '@/pages/audits/CreateAuditPage';
 import { AuditExecutionPage } from '@/pages/audits/AuditExecutionPage';
 import { AuditReportPage } from '@/pages/audits/AuditReportPage';
 import { ComparisonsPage } from '@/pages/comparisons/ComparisonsPage';
+import { CreateComparisonPage } from '@/pages/comparisons/CreateComparisonPage';
+import { ComparisonDetailPage } from '@/pages/comparisons/ComparisonDetailPage';
 import { RecommendationsPage } from '@/pages/recommendations/RecommendationsPage';
 import { TeamsPage } from '@/pages/teams/TeamsPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -116,6 +119,20 @@ export const AppRoutes: React.FC = () => {
         }
       />
 
+      <Route
+        path="/templates/:id/editor"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <TemplateEditorPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Auditorías */}
       <Route
         path="/audits"
@@ -182,6 +199,34 @@ export const AppRoutes: React.FC = () => {
               <Navbar />
               <main className="container-custom py-8">
                 <ComparisonsPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/comparisons/create"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <CreateComparisonPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/comparisons/:id"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <ComparisonDetailPage />
               </main>
             </>
           </ProtectedRoute>

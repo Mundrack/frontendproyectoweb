@@ -30,7 +30,7 @@ export const TopCompaniesTable: React.FC<TopCompaniesTableProps> = ({ companies 
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {companies.map((company) => {
-              const scoreColor = getScoreColor(company.average_score);
+              const scoreColor = getScoreColor(company.avg_score);
               const colorClass = scoreColor === 'success' ? 'text-success-600' : scoreColor === 'warning' ? 'text-warning-600' : 'text-danger-600';
 
               return (
@@ -39,11 +39,11 @@ export const TopCompaniesTable: React.FC<TopCompaniesTableProps> = ({ companies 
                     {company.company_name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {company.audits_count}
+                    {company.total_audits}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`font-semibold ${colorClass}`}>
-                      {company.average_score.toFixed(1)}%
+                      {company.avg_score.toFixed(1)}%
                     </span>
                   </td>
                 </tr>

@@ -10,15 +10,24 @@ export interface Template {
 
 export interface TemplateQuestion {
   id: number;
-  template_id: number;
+  template: number; // Changed from template_id to match serializer
   question_text: string;
   category: string;
-  weight: number;
-  order_index: number;
+  max_score: number; // Changed from weight
+  order_num: number; // Changed from order_index
+  is_required: boolean;
+  help_text?: string;
 }
 
 export interface TemplateWithQuestions extends Template {
   questions: TemplateQuestion[];
+}
+
+export interface CreateTemplateData {
+  name: string;
+  iso_standard: string;
+  description?: string;
+  is_active?: boolean;
 }
 
 export type AuditStatus = 'draft' | 'in_progress' | 'completed';
@@ -49,12 +58,11 @@ export interface Audit {
 
 export interface CreateAuditData {
   title: string;
-  description: string;
-  template_id: number;
-  company_id: number;
-  branch_id?: number;
-  department_id?: number;
-  assigned_to_id?: number;
+  notes?: string;
+  template: number;
+  company: number;
+  branch?: number;
+  assigned_to?: number;
   scheduled_date?: string;
 }
 

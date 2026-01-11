@@ -1,25 +1,30 @@
 export interface Team {
   id: number;
   name: string;
-  department: number;
-  department_detail: {
+  department?: number;
+  department_detail?: {
     id: number;
     name: string;
     branch_name: string;
   };
+  department_name?: string;
+  branch_name?: string;
+  company_name?: string;
   team_type: 'gerente_general' | 'manager_equipo' | 'miembro_equipo';
   team_type_display: string;
-  leader: number | null;
-  leader_detail: {
+  leader?: number | null;
+  leader_detail?: {
     id: number;
     name: string;
     email: string;
   } | null;
-  description: string;
+  leader_name?: string;
+  description?: string;
   is_active: boolean;
-  members_detail: TeamMember[];
+  members_detail?: TeamMember[];
   member_count: number;
-  created_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface TeamMember {
