@@ -1,5 +1,13 @@
 # Sistema de Auditorías - Frontend
 
+## 🚀 Enlaces Rápidos y Demo
+- **📺 Video Explicativo:** [Ver en YouTube](https://youtu.be/SnSKTyVdA3U)
+- **🌐 Frontend Deploy:** [frontendproyectoweb.vercel.app](https://frontendproyectoweb.vercel.app)
+- **⚙️ Backend Deploy:** [backendproyectoweb.onrender.com](https://backendproyectoweb.onrender.com)
+
+---
+
+
 Frontend desarrollado con React + TypeScript + Vite para el sistema de gestión de auditorías empresariales.
 
 > Este README incluye instrucciones detalladas para poner en marcha tanto el Frontend como el Back-end que lo acompaña. Para la documentación completa de la API, ver `../backend/API_DOCUMENTATION_FRONTEND.md` o el README del backend (enlace abajo).
