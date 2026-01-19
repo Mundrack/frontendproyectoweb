@@ -1,4 +1,16 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const getApiBaseUrl = () => {
+  let url = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`;
+  }
+  // Remove trailing slash if present
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  return url;
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 export const APP_NAME = import.meta.env.VITE_APP_NAME || 'Sistema de Auditorías';
 
 export const ROUTES = {
