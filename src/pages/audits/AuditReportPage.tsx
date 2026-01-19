@@ -148,7 +148,7 @@ export const AuditReportPage: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Detalle de Respuestas</h2>
 
         <div className="space-y-6">
-          {Object.entries(report.score_by_category).map(([category, categoryScore]) => {
+          {Object.entries(report.score_by_category).map(([category, _]) => {
             const categoryResponses = report.responses.filter(
               (r) => r.category === category
             );

@@ -5,7 +5,7 @@ import { auditsApi } from '@/api/endpoints/audits';
 import { templatesApi } from '@/api/endpoints/templates';
 import { companiesApi } from '@/api/endpoints/companies';
 import { Template, CreateAuditData } from '@/types/audit.types';
-import { Company, Branch, Department } from '@/types/company.types';
+import { Company, Branch } from '@/types/company.types';
 import { User } from '@/types/auth.types';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
@@ -21,7 +21,8 @@ export const CreateAuditPage: React.FC = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
+
+
   const [employees, setEmployees] = useState<User[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -38,9 +39,8 @@ export const CreateAuditPage: React.FC = () => {
     scheduled_date: undefined,
   });
 
-  // For cascading dropdowns, track selections separately
-  const [selectedBranch, setSelectedBranch] = useState<number | undefined>();
-  const [selectedDepartment, setSelectedDepartment] = useState<number | undefined>();
+
+
 
   useEffect(() => {
     loadInitialData();
@@ -51,17 +51,8 @@ export const CreateAuditPage: React.FC = () => {
       loadBranches(formData.company);
     } else {
       setBranches([]);
-      setDepartments([]);
     }
   }, [formData.company]);
-
-  useEffect(() => {
-    if (selectedBranch) {
-      loadDepartments(selectedBranch);
-    } else {
-      setDepartments([]);
-    }
-  }, [selectedBranch]);
 
   const loadInitialData = async () => {
     try {
@@ -110,23 +101,6 @@ export const CreateAuditPage: React.FC = () => {
     }
   };
 
-  const loadDepartments = async (branchId: number) => {
-    try {
-      const data = await companiesApi.getDepartments(branchId);
-      // Handle paginated response from Django REST Framework
-      if (Array.isArray(data)) {
-        setDepartments(data);
-      } else if (data && typeof data === 'object' && 'results' in data) {
-        setDepartments((data as any).results || []);
-      } else {
-        setDepartments([]);
-      }
-    } catch (err) {
-      console.error('Error loading departments:', err);
-      setDepartments([]);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -159,7 +133,7 @@ export const CreateAuditPage: React.FC = () => {
 
     try {
       setSubmitting(true);
-      const audit = await auditsApi.createAudit(cleanedData);
+      await auditsApi.createAudit(cleanedData);
       navigate('/audits');
     } catch (err: any) {
       console.error('Error creating audit:', err);
@@ -255,8 +229,6 @@ export const CreateAuditPage: React.FC = () => {
                     company: companyId,
                     branch: undefined,
                   });
-                  setSelectedBranch(undefined);
-                  setSelectedDepartment(undefined);
                 }}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -282,8 +254,6 @@ export const CreateAuditPage: React.FC = () => {
                     ...formData,
                     branch: branchId,
                   });
-                  setSelectedBranch(branchId);
-                  setSelectedDepartment(undefined);
                 }}
                 disabled={!formData.company || branches.length === 0}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"

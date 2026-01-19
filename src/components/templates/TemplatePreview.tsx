@@ -42,7 +42,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template, onCl
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{category}</h3>
                 <div className="space-y-3">
                   {questions
-                    .sort((a, b) => a.order_index - b.order_index)
+                    .sort((a, b) => a.order_num - b.order_num)
                     .map((question, idx) => (
                       <div key={question.id} className="flex gap-3">
                         <span className="text-sm font-medium text-gray-500 mt-0.5">
@@ -50,7 +50,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template, onCl
                         </span>
                         <div className="flex-1">
                           <p className="text-sm text-gray-700">{question.question_text}</p>
-                          <span className="text-xs text-gray-500">Peso: {question.weight}</span>
+                          <span className="text-xs text-gray-500">Peso: {question.max_score}</span>
                         </div>
                       </div>
                     ))}

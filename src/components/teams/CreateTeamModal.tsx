@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { CreateTeamData } from '@/types/team.types';
 import { Company, Branch, Department } from '@/types/company.types';
-import { User } from '@/types/auth.types';
+
 import { companiesApi } from '@/api/endpoints/companies';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -24,7 +24,7 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
   const [companies, setCompanies] = useState<Company[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [employees, setEmployees] = useState<User[]>([]);
+
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState<CreateTeamData>({

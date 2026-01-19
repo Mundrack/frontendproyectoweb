@@ -50,11 +50,7 @@ export const ComparisonDetailPage: React.FC = () => {
     return <Minus className="h-5 w-5 text-gray-600" />;
   };
 
-  const getTrendColor = (value: number) => {
-    if (value > 0) return 'text-success-600';
-    if (value < 0) return 'text-error-600';
-    return 'text-gray-600';
-  };
+
 
   if (loading) {
     return (

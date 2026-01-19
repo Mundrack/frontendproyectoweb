@@ -52,6 +52,7 @@ export interface Audit {
   completed_date?: string;
   score?: number;
   max_score?: number;
+  score_percentage?: number;
   created_at: string;
   updated_at: string;
 }
@@ -72,8 +73,8 @@ export interface QuestionWithResponse {
   question_id: number;
   question_text: string;
   category: string;
-  weight: number;
-  order_index: number;
+  max_score: number;
+  order_num: number;
   response?: ResponseType;
   comments?: string;
   has_response: boolean;

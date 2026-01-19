@@ -1,0 +1,5 @@
+﻿src/components/audits/QuestionCard.tsx(87,69): error TS2339: Property 'weight' does not exist on type 'QuestionWithResponse'.
+src/components/templates/TemplatePreview.tsx(45,39): error TS2339: Property 'order_index' does not exist on type 'TemplateQuestion'.
+src/components/templates/TemplatePreview.tsx(45,55): error TS2339: Property 'order_index' does not exist on type 'TemplateQuestion'.
+src/components/templates/TemplatePreview.tsx(53,83): error TS2339: Property 'weight' does not exist on type 'TemplateQuestion'.
+src/pages/audits/CreateAuditPage.tsx(24,10): error TS6133: 'departments' is declared but its value is never read.

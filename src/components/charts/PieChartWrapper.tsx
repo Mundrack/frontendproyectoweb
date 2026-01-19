@@ -35,7 +35,7 @@ export const PieChartWrapper: React.FC<PieChartWrapperProps> = ({
           outerRadius={80}
           label
         >
-          {data.map((entry, index) => (
+          {data.map((_, index) => (
             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
           ))}
         </Pie>

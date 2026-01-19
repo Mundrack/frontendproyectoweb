@@ -84,7 +84,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           <h3 className="text-lg font-medium text-gray-900 leading-relaxed">
             {question.question_text}
           </h3>
-          <p className="text-sm text-gray-500 mt-2">Peso: {question.weight}</p>
+          <p className="text-sm text-gray-500 mt-2">Peso: {question.max_score}</p>
         </div>
 
         <div>

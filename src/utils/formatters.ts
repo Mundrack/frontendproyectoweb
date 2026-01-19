@@ -38,8 +38,8 @@ export const getStatusLabel = (status: AuditStatus): string => {
   return labels[status];
 };
 
-export const getStatusColor = (status: AuditStatus): string => {
-  const colors: Record<AuditStatus, string> = {
+export const getStatusColor = (status: AuditStatus): 'gray' | 'primary' | 'success' | 'warning' | 'danger' => {
+  const colors: Record<AuditStatus, 'gray' | 'primary' | 'success' | 'warning' | 'danger'> = {
     draft: 'gray',
     in_progress: 'primary',
     completed: 'success',
@@ -57,8 +57,8 @@ export const getResponseLabel = (response: ResponseType): string => {
   return labels[response];
 };
 
-export const getResponseColor = (response: ResponseType): string => {
-  const colors: Record<ResponseType, string> = {
+export const getResponseColor = (response: ResponseType): 'success' | 'danger' | 'warning' | 'gray' => {
+  const colors: Record<ResponseType, 'success' | 'danger' | 'warning' | 'gray'> = {
     yes: 'success',
     no: 'danger',
     partial: 'warning',
@@ -72,7 +72,7 @@ export const calculatePercentage = (value: number, total: number): number => {
   return Math.round((value / total) * 100);
 };
 
-export const getScoreColor = (percentage: number): string => {
+export const getScoreColor = (percentage: number): 'success' | 'warning' | 'danger' => {
   if (percentage >= 80) return 'success';
   if (percentage >= 60) return 'warning';
   return 'danger';

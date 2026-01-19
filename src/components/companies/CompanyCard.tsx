@@ -1,7 +1,7 @@
 import React from 'react';
 import { Building2, Edit, Trash2, MapPin } from 'lucide-react';
 import { Card } from '@/components/common/Card';
-import { Badge } from '@/components/common/Badge';
+
 import { Button } from '@/components/common/Button';
 import { Company } from '@/types/company.types';
 

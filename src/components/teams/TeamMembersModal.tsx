@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, UserCog } from 'lucide-react';
-import { Team, TeamMember } from '@/types/team.types';
+import { X, Plus, Trash2 } from 'lucide-react';
+import { Team } from '@/types/team.types';
 import { User } from '@/types/auth.types';
 import { teamsApi } from '@/api/endpoints/teams';
 import { companiesApi } from '@/api/endpoints/companies';
