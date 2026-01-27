@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, ExternalLink } from 'lucide-react';
 import { CreateTeamData } from '@/types/team.types';
 import { Company, Branch, Department } from '@/types/company.types';
 
@@ -24,6 +25,8 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
   const [companies, setCompanies] = useState<Company[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+
+  const navigate = useNavigate();
 
   const [error, setError] = useState('');
 
@@ -220,7 +223,19 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
               </label>
               {selectedBranch && departments.length === 0 ? (
                 <div className="bg-warning-50 border border-warning-200 text-warning-800 px-3 py-2 rounded text-sm mb-2">
-                  No hay departamentos en esta sucursal. Debes crear un departamento antes de crear un equipo.
+                  <p className="mb-2">No hay departamentos en esta sucursal. Debes crear un departamento antes de crear un equipo.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      onClose();
+                      navigate(`/branches/${selectedBranch}`);
+                    }}
+                    className="w-full justify-center bg-white"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Ir a gestionar sucursal
+                  </Button>
                 </div>
               ) : (
                 <select
