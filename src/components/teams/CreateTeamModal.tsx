@@ -90,11 +90,16 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
 
   const loadDepartments = async (branchId: number) => {
     try {
+      console.log('🔄 Cargando departamentos para branch:', branchId);
       const data = await companiesApi.getDepartments(branchId);
+      console.log('📦 Departamentos respuesta:', data);
+
       const departmentsArray = Array.isArray(data) ? data : (data as any)?.results || [];
+      console.log('✅ Departamentos procesados:', departmentsArray);
+
       setDepartments(departmentsArray);
     } catch (err) {
-      console.error('Error loading departments:', err);
+      console.error('❌ Error loading departments:', err);
       setDepartments([]);
     }
   };
@@ -213,20 +218,28 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Departamento *
               </label>
-              <select
-                value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: Number(e.target.value) })}
-                required
-                disabled={!selectedBranch || departments.length === 0}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
-                <option value="">Selecciona un departamento</option>
-                {departments.map((department) => (
-                  <option key={department.id} value={department.id}>
-                    {department.name}
+              {selectedBranch && departments.length === 0 ? (
+                <div className="bg-warning-50 border border-warning-200 text-warning-800 px-3 py-2 rounded text-sm mb-2">
+                  No hay departamentos en esta sucursal. Debes crear un departamento antes de crear un equipo.
+                </div>
+              ) : (
+                <select
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: Number(e.target.value) })}
+                  required
+                  disabled={!selectedBranch || departments.length === 0}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">
+                    {departments.length === 0 ? 'No hay departamentos disponibles' : 'Selecciona un departamento'}
                   </option>
-                ))}
-              </select>
+                  {departments.map((department) => (
+                    <option key={department.id} value={department.id}>
+                      {department.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div>
