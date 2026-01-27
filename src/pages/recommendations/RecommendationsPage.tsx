@@ -66,8 +66,8 @@ export const RecommendationsPage: React.FC = () => {
 
       const completedAudits = auditsArray.filter(
         (a: any) => {
-          console.log(`Auditoría ${a.id}: template_id=${a.template_id}, status=${a.status}`);
-          return a.template_id === templateId && a.status === 'completed';
+          console.log(`Auditoría ${a.id}: template=${a.template}, status=${a.status}`);
+          return a.template === templateId && a.status === 'completed';
         }
       );
 
