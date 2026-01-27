@@ -55,10 +55,23 @@ export const RecommendationsPage: React.FC = () => {
       setError('');
 
       // Obtener todas las auditorías completadas de esta plantilla
-      const audits = await auditsApi.getAudits();
-      const completedAudits = audits.filter(
-        (a: any) => a.template_id === templateId && a.status === 'completed'
+      const auditsResponse = await auditsApi.getAudits();
+
+      // Handle both array and paginated response
+      const auditsArray = Array.isArray(auditsResponse)
+        ? auditsResponse
+        : (auditsResponse as any).results || [];
+
+      console.log('📊 Auditorías obtenidas:', auditsArray);
+
+      const completedAudits = auditsArray.filter(
+        (a: any) => {
+          console.log(`Auditoría ${a.id}: template_id=${a.template_id}, status=${a.status}`);
+          return a.template_id === templateId && a.status === 'completed';
+        }
       );
+
+      console.log('✅ Auditorías completadas filtradas:', completedAudits);
 
       if (completedAudits.length === 0) {
         setError('No hay auditorías completadas para esta plantilla');
@@ -102,8 +115,18 @@ export const RecommendationsPage: React.FC = () => {
       });
 
     } catch (err: any) {
-      console.error('Error analyzing template:', err);
-      setError('Error al analizar la plantilla. Asegúrate de tener auditorías completadas.');
+      console.error('❌ Error analyzing template:', err);
+      console.error('❌ Error response:', err.response);
+
+      let errorMessage = 'Error al analizar la plantilla.';
+
+      if (err.response?.status === 404) {
+        errorMessage = 'No se encontró el reporte de la auditoría.';
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      }
+
+      setError(errorMessage + ' Asegúrate de tener auditorías completadas.');
       setAnalysis(null);
     } finally {
       setAnalyzing(false);
@@ -286,15 +309,15 @@ export const RecommendationsPage: React.FC = () => {
                     <div className="w-32 bg-gray-200 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full ${category.percentage >= 65
-                            ? 'bg-success-600'
-                            : 'bg-danger-600'
+                          ? 'bg-success-600'
+                          : 'bg-danger-600'
                           }`}
                         style={{ width: `${Math.min(category.percentage, 100)}%` }}
                       />
                     </div>
                     <span className={`font-bold text-sm w-16 text-right ${category.percentage >= 65
-                        ? 'text-success-600'
-                        : 'text-danger-600'
+                      ? 'text-success-600'
+                      : 'text-danger-600'
                       }`}>
                       {category.percentage.toFixed(1)}%
                     </span>
