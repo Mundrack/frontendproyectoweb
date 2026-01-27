@@ -6,12 +6,14 @@ interface BranchListProps {
   branches: Branch[];
   onEdit: (branch: Branch) => void;
   onDelete: (branch: Branch) => void;
+  onViewDetails?: (branch: Branch) => void;
 }
 
 export const BranchList: React.FC<BranchListProps> = ({
   branches,
   onEdit,
   onDelete,
+  onViewDetails,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -21,6 +23,7 @@ export const BranchList: React.FC<BranchListProps> = ({
           branch={branch}
           onEdit={onEdit}
           onDelete={onDelete}
+          onViewDetails={onViewDetails}
         />
       ))}
     </div>

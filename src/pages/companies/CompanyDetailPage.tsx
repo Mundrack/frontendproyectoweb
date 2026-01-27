@@ -96,6 +96,10 @@ export const CompanyDetailPage: React.FC = () => {
     }
   };
 
+  const handleViewDetails = (branch: Branch) => {
+    navigate(`/branches/${branch.id}`);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -158,7 +162,7 @@ export const CompanyDetailPage: React.FC = () => {
           />
         </Card>
       ) : (
-        <BranchList branches={branches} onEdit={handleEdit} onDelete={handleDelete} />
+        <BranchList branches={branches} onEdit={handleEdit} onDelete={handleDelete} onViewDetails={handleViewDetails} />
       )}
 
       {/* Modal Crear */}

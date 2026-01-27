@@ -6,6 +6,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { CompaniesPage } from '@/pages/companies/CompaniesPage';
 import { CompanyDetailPage } from '@/pages/companies/CompanyDetailPage';
+import { BranchDetailPage } from '@/pages/branches/BranchDetailPage';
 import { BranchesPage } from '@/pages/branches/BranchesPage';
 import { DepartmentsPage } from '@/pages/departments/DepartmentsPage';
 import { TemplatesPage } from '@/pages/templates/TemplatesPage';
@@ -75,6 +76,20 @@ export const AppRoutes: React.FC = () => {
       />
 
       {/* Sucursales */}
+      <Route
+        path="/branches/:id"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar />
+              <main className="container-custom py-8">
+                <BranchDetailPage />
+              </main>
+            </>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/branches"
         element={
