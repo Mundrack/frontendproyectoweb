@@ -8,6 +8,7 @@ import { Card } from '@/components/common/Card';
 import { Spinner } from '@/components/common/Spinner';
 import { Alert } from '@/components/common/Alert';
 import { Input } from '@/components/common/Input';
+import { CreateQuestionDialog, QuestionFormData } from '@/components/templates/CreateQuestionDialog';
 
 export const TemplateEditorPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ export const TemplateEditorPage: React.FC = () => {
     const [success, setSuccess] = useState('');
     const [saving, setSaving] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     // Form states for editing
     const [editForm, setEditForm] = useState<Partial<TemplateQuestion>>({});
@@ -97,10 +99,31 @@ export const TemplateEditorPage: React.FC = () => {
     };
 
     const handleAddQuestion = () => {
-        // Navigate to create question page or show modal
-        // For now, let's just log it
-        console.log('Add question clicked');
-        alert('Funcionalidad de agregar pregunta próximamente');
+        setIsCreateDialogOpen(true);
+    };
+
+    const handleCreateQuestion = async (formData: QuestionFormData) => {
+        if (!template) return;
+
+        try {
+            setSaving(true);
+            const newQuestion = await templatesApi.createQuestion({
+                ...formData,
+                template: template.id,
+            });
+
+            setQuestions(prev => [...prev, newQuestion].sort((a, b) => a.order_num - b.order_num));
+            setIsCreateDialogOpen(false);
+            setSuccess('Pregunta creada correctamente');
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err: any) {
+            console.error('Error creating question:', err);
+            const errorMessage = err.response?.data?.error || 'Error al crear la pregunta';
+            setError(errorMessage);
+            setTimeout(() => setError(''), 5000);
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (loading) {
@@ -254,6 +277,14 @@ export const TemplateEditorPage: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            <CreateQuestionDialog
+                isOpen={isCreateDialogOpen}
+                onClose={() => setIsCreateDialogOpen(false)}
+                onSubmit={handleCreateQuestion}
+                nextOrderNum={questions.length > 0 ? Math.max(...questions.map(q => q.order_num)) + 1 : 1}
+                isLoading={saving}
+            />
         </div>
     );
 };

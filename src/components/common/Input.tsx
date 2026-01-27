@@ -4,10 +4,12 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   helperText?: string;
+  help?: string; // Alias for helperText
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, className = '', ...props }, ref) => {
+  ({ label, error, helperText, help, className = '', ...props }, ref) => {
+    const helpText = helperText || help;
     return (
       <div className="w-full">
         {label && (
@@ -30,8 +32,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {error && (
           <p className="mt-1 text-sm text-danger-600">{error}</p>
         )}
-        {helperText && !error && (
-          <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+        {helpText && !error && (
+          <p className="mt-1 text-sm text-gray-500">{helpText}</p>
         )}
       </div>
     );
