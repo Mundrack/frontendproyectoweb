@@ -36,6 +36,15 @@ Frontend desarrollado con React + TypeScript + Vite para el sistema de gestión 
 - **Nombre:** Sistema de Auditorías (Frontend)
 - **Propósito:** Interfaz para crear y gestionar auditorías, empresas, plantillas, equipos y comparaciones. Se comunica con una API REST (Django REST) que contiene la lógica de negocio y persistencia.
 
+> 📘 **Documentación Técnica**: Para detalles de arquitectura, diagramas y modelos de datos, ver **[DOCUMENTACION_TECNICA.md](../DOCUMENTACION_TECNICA.md)** en la raíz del proyecto.
+
+## Funcionalidades Clave
+- **Dashboard**: Vista general de métricas.
+- **Auditorías**: Ejecución y reporte.
+- **Recomendaciones**: Análisis inteligente de deficiencias.
+- **Equipos**: Gestión de estructura organizacional.
+- **Empresas**: Administración multi-sucursal.
+
 ## 2) Requisitos previos
 - Node.js >= 18 (recomendado) + npm >= 9
 - Python 3.10+ (para el backend)
