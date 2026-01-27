@@ -41,8 +41,20 @@ export const RecommendationsPage: React.FC = () => {
     try {
       setLoading(true);
       const data = await templatesApi.getTemplates();
-      setTemplates(Array.isArray(data) ? data : []);
-    } catch (err) {
+      console.log('📋 Plantillas respuesta API:', data);
+
+      let templatesData: Template[] = [];
+
+      if (Array.isArray(data)) {
+        templatesData = data;
+      } else if (data && typeof data === 'object' && 'results' in data) {
+        templatesData = (data as any).results || [];
+      }
+
+      console.log('✅ Plantillas procesadas:', templatesData);
+      setTemplates(templatesData);
+    } catch (err: any) {
+      console.error('❌ Error al cargar plantillas:', err);
       setError('Error al cargar las plantillas');
     } finally {
       setLoading(false);
