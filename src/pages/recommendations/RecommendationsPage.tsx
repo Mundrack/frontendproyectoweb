@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, AlertTriangle, CheckCircle, TrendingDown } from 'lucide-react';
-import { templatesApi } from '@/api/endpoints/templates';
 import { auditsApi } from '@/api/endpoints/audits';
-import { Template } from '@/types/audit.types';
+import { Audit } from '@/types/audit.types';
 import { Card } from '@/components/common/Card';
 import { Spinner } from '@/components/common/Spinner';
 import { Alert } from '@/components/common/Alert';
 import { EmptyState } from '@/components/common/EmptyState';
+import { formatDate } from '@/utils/formatters';
 
 interface CategoryAnalysis {
   category: string;
@@ -26,89 +26,69 @@ interface TemplateAnalysis {
 }
 
 export const RecommendationsPage: React.FC = () => {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [audits, setAudits] = useState<Audit[]>([]);
+  const [selectedAuditId, setSelectedAuditId] = useState<number | null>(null);
   const [analysis, setAnalysis] = useState<TemplateAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    loadTemplates();
+    loadCompletedAudits();
   }, []);
 
-  const loadTemplates = async () => {
+  const loadCompletedAudits = async () => {
     try {
       setLoading(true);
-      const data = await templatesApi.getTemplates();
-      console.log('📋 Plantillas respuesta API:', data);
+      const data = await auditsApi.getAudits();
 
-      let templatesData: Template[] = [];
+      let auditsData: Audit[] = [];
 
       if (Array.isArray(data)) {
-        templatesData = data;
+        auditsData = data;
       } else if (data && typeof data === 'object' && 'results' in data) {
-        templatesData = (data as any).results || [];
+        auditsData = (data as any).results || [];
       }
 
-      console.log('✅ Plantillas procesadas:', templatesData);
-      setTemplates(templatesData);
+      // Filter only completed audits
+      const completed = auditsData.filter(a => a.status === 'completed');
+
+      console.log('✅ Auditorías completadas cargadas:', completed);
+      setAudits(completed);
     } catch (err: any) {
-      console.error('❌ Error al cargar plantillas:', err);
-      setError('Error al cargar las plantillas');
+      console.error('❌ Error al cargar auditorías:', err);
+      setError('Error al cargar las auditorías');
     } finally {
       setLoading(false);
     }
   };
 
-  const analyzeTemplate = async (templateId: number) => {
+  const analyzeAudit = async (auditId: number) => {
     try {
       setAnalyzing(true);
       setError('');
 
-      // Obtener todas las auditorías completadas de esta plantilla
-      const auditsResponse = await auditsApi.getAudits();
-
-      // Handle both array and paginated response
-      const auditsArray = Array.isArray(auditsResponse)
-        ? auditsResponse
-        : (auditsResponse as any).results || [];
-
-      console.log('📊 Auditorías obtenidas:', auditsArray);
-
-      const completedAudits = auditsArray.filter(
-        (a: any) => {
-          console.log(`Auditoría ${a.id}: template=${a.template}, status=${a.status}`);
-          return a.template === templateId && a.status === 'completed';
-        }
-      );
-
-      console.log('✅ Auditorías completadas filtradas:', completedAudits);
-
-      if (completedAudits.length === 0) {
-        setError('No hay auditorías completadas para esta plantilla');
-        setAnalysis(null);
+      const audit = audits.find(a => a.id === auditId);
+      if (!audit) {
+        setError('Auditoría no encontrada');
         return;
       }
 
-      // Tomar la auditoría más reciente
-      const latestAudit = completedAudits.sort((a: any, b: any) =>
-        new Date(b.completed_date).getTime() - new Date(a.completed_date).getTime()
-      )[0];
-
       // Obtener el reporte de la auditoría
-      const report = await auditsApi.getAuditReport(latestAudit.id);
-
-      const template = templates.find(t => t.id === templateId);
+      const report = await auditsApi.getAuditReport(auditId);
+      console.log('📈 Reporte obtenido:', report);
 
       // Analizar categorías
       const categories: CategoryAnalysis[] = Object.entries(report.score_by_category).map(
         ([category, data]: [string, any]) => {
-          const percentage = (data.score / data.max_score) * 100;
+          const maxScore = data.max_score || 0;
+          const score = data.score || 0;
+          const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+
           return {
             category,
-            score: data.score,
-            maxScore: data.max_score,
+            score,
+            maxScore,
             percentage,
             needsAttention: percentage < 65
           };
@@ -116,21 +96,22 @@ export const RecommendationsPage: React.FC = () => {
       );
 
       const categoriesNeedingAttention = categories.filter(c => c.needsAttention);
+      const totalScore = audit.score || 0;
+      const maxScore = audit.max_score || 100; // Default to 100 if missing
+      const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
 
       setAnalysis({
-        templateName: template?.name || 'Plantilla',
-        totalScore: latestAudit.score || 0,
-        maxScore: latestAudit.max_score || 100,
-        percentage: latestAudit.score_percentage || 0,
+        templateName: audit.template_name || 'Plantilla',
+        totalScore,
+        maxScore,
+        percentage,
         categoriesNeedingAttention,
         allCategories: categories
       });
 
     } catch (err: any) {
-      console.error('❌ Error analyzing template:', err);
-      console.error('❌ Error response:', err.response);
-
-      let errorMessage = 'Error al analizar la plantilla.';
+      console.error('❌ Error analyzing audit:', err);
+      let errorMessage = 'Error al analizar la auditoría.';
 
       if (err.response?.status === 404) {
         errorMessage = 'No se encontró el reporte de la auditoría.';
@@ -138,18 +119,18 @@ export const RecommendationsPage: React.FC = () => {
         errorMessage = err.response.data.error;
       }
 
-      setError(errorMessage + ' Asegúrate de tener auditorías completadas.');
+      setError(errorMessage);
       setAnalysis(null);
     } finally {
       setAnalyzing(false);
     }
   };
 
-  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const templateId = Number(e.target.value);
-    setSelectedTemplateId(templateId);
-    if (templateId) {
-      analyzeTemplate(templateId);
+  const handleAuditChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const auditId = Number(e.target.value);
+    setSelectedAuditId(auditId);
+    if (auditId) {
+      analyzeAudit(auditId);
     } else {
       setAnalysis(null);
     }
@@ -168,29 +149,29 @@ export const RecommendationsPage: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Recomendaciones</h1>
         <p className="text-gray-600 mt-1">
-          Gestiona recomendaciones automáticas y manuales para mejorar tus auditorías
+          Selecciona una auditoría completada para ver el análisis vs la plantilla y áreas de mejora
         </p>
       </div>
 
       {error && <Alert type="error" message={error} onClose={() => setError('')} />}
 
-      {/* Selector de Plantilla */}
+      {/* Selector de Auditoría */}
       <Card>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Selecciona una Plantilla para Analizar
+              Selecciona una Auditoría Completada
             </label>
             <select
-              value={selectedTemplateId || ''}
-              onChange={handleTemplateChange}
+              value={selectedAuditId || ''}
+              onChange={handleAuditChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               disabled={analyzing}
             >
-              <option value="">-- Selecciona una plantilla --</option>
-              {templates.map((template) => (
-                <option key={template.id} value={template.id}>
-                  {template.name}
+              <option value="">-- Selecciona una auditoría --</option>
+              {audits.map((audit) => (
+                <option key={audit.id} value={audit.id}>
+                  {audit.title} - {audit.template_name} ({formatDate(audit.completed_date || audit.updated_at)})
                 </option>
               ))}
             </select>
@@ -199,13 +180,13 @@ export const RecommendationsPage: React.FC = () => {
           {analyzing && (
             <div className="flex items-center justify-center py-8">
               <Spinner size="md" />
-              <span className="ml-3 text-gray-600">Analizando plantilla...</span>
+              <span className="ml-3 text-gray-600">Analizando auditoría...</span>
             </div>
           )}
         </div>
       </Card>
 
-      {/* Análisis de Plantilla */}
+      {/* Análisis de Auditoría */}
       {analysis && !analyzing && (
         <>
           {/* Comparación VS */}
@@ -217,7 +198,7 @@ export const RecommendationsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Puntaje Actual */}
               <div className="text-center p-6 bg-primary-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-2">Tu Puntaje</p>
+                <p className="text-sm text-gray-600 mb-2">Puntaje Obtenido</p>
                 <p className="text-4xl font-bold text-primary-600">
                   {analysis.totalScore}
                 </p>
@@ -233,7 +214,7 @@ export const RecommendationsPage: React.FC = () => {
 
               {/* Puntaje Perfecto */}
               <div className="text-center p-6 bg-success-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-2">Puntaje Perfecto</p>
+                <p className="text-sm text-gray-600 mb-2">Puntaje Máximo Posible</p>
                 <p className="text-4xl font-bold text-success-600">
                   {analysis.maxScore}
                 </p>
@@ -321,15 +302,15 @@ export const RecommendationsPage: React.FC = () => {
                     <div className="w-32 bg-gray-200 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full ${category.percentage >= 65
-                          ? 'bg-success-600'
-                          : 'bg-danger-600'
+                            ? 'bg-success-600'
+                            : 'bg-danger-600'
                           }`}
                         style={{ width: `${Math.min(category.percentage, 100)}%` }}
                       />
                     </div>
                     <span className={`font-bold text-sm w-16 text-right ${category.percentage >= 65
-                      ? 'text-success-600'
-                      : 'text-danger-600'
+                        ? 'text-success-600'
+                        : 'text-danger-600'
                       }`}>
                       {category.percentage.toFixed(1)}%
                     </span>
@@ -342,12 +323,12 @@ export const RecommendationsPage: React.FC = () => {
       )}
 
       {/* Empty State */}
-      {!selectedTemplateId && !analyzing && (
+      {!selectedAuditId && !analyzing && (
         <Card>
           <EmptyState
             icon={Lightbulb}
-            title="Selecciona una Plantilla"
-            description="Elige una plantilla de auditoría para ver el análisis automático y las áreas que necesitan atención"
+            title="Selecciona una Auditoría"
+            description="Elige una auditoría completada para ver el análisis automático y las áreas que necesitan atención"
           />
         </Card>
       )}
